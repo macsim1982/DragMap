@@ -30,10 +30,10 @@ class DrawCircle {
     addEvents(eventElement) {
 
         // Desktop
-        // this.el.addEventListener("pointerdown", this.onTouchStart.bind(this));
-        // this.el.addEventListener("pointermove", this.onTouchMove.bind(this));
-        // this.el.addEventListener("pointerup", this.onTouchEnd.bind(this));
-        // this.el.addEventListener("pointercancel", this.onTouchCancel.bind(this));
+        this.el.addEventListener("mousedown", this.onTouchStart.bind(this));
+        this.el.addEventListener("mousemove", this.onTouchMove.bind(this));
+        this.el.addEventListener("mouseup", this.onTouchEnd.bind(this));
+        this.el.addEventListener("mouseleave", this.mouseup.bind(this));
 
         // Mobile
         eventElement.addEventListener("touchstart", this.onTouchStart.bind(this), {passive: false});
@@ -59,6 +59,10 @@ class DrawCircle {
         this.map && this.map.desactivate();
 
         this.isTouching = true;
+
+        if (!e.changedTouches) {
+            e.changedTouches = [{ pageX: e.pageX, pageY: e.pageY }];
+        }
 
         this.startX = e.changedTouches[0].pageX;
         this.startY = e.changedTouches[0].pageY;
@@ -135,6 +139,10 @@ class DrawCircle {
         }
 
         this.canDraw = false;
+
+        if (!e.changedTouches) {
+            e.changedTouches = [{ pageX: e.pageX, pageY: e.pageY }];
+        }
 
         e.preventDefault();
 
