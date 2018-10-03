@@ -8,8 +8,9 @@ import '../styles/index.scss';
 
 import DragMap from './DragMap.js';
 import DrawCircle from './DrawCircle.js';
+
 // import WebGL from './WebGL.js';
-import iceFactory from './iceFactory.js';
+// import iceFactory from './iceFactory.js';
 /*
 
 ——————————————————————
@@ -33,8 +34,10 @@ const plugins = [CSSPlugin, ScrollToPlugin];
 
 let map = new DragMap({});
 let draw = new DrawCircle({ map, className: 'circle', eventElement: document, color: "yellow", minDelta: 50, maxDelta: 800 });
-let gl = new WebGL({ canvasSelector: '#canvas', bgColor: [0, 0, 0, 0] });
 
+// let gl = new WebGL({ canvasSelector: '#canvas', bgColor: [0, 0, 0, 0] });
+
+/*
 const db = [];
 const cart = iceFactory({ db });
 
@@ -94,7 +97,5 @@ cart.getItems('removeItem(\'U00003\')');
 cart.removeItem(true, 'nope');
 cart.getItems('removeItem(true, \'nope\')');
 
-
-
-
 console.log('item filterd by price 2.99', cart.filterByPrice(2.99));
+*/
