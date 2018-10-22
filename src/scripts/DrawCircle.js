@@ -4,13 +4,13 @@ class DrawCircle {
         this.map = options.map;
         this.boxes = [];
         this.minDeltaX = options.minDelta || options.minDeltaX || 0;
-        this.maxDeltaX = options.maxDelta || options.maxDeltaY || 0;
+        this.maxDeltaX = options.maxDelta || options.maxDeltaX || 0;
 
         this.minDeltaY = options.minDelta || options.minDeltaY || this.minDeltaX;
         this.maxDeltaY = options.maxDelta || options.maxDeltaY || this.maxDeltaX;
 
         this.startX = options.x || -1;
-        this.startY = options.x || -1;
+        this.startY = options.y || -1;
         this.color = options.color || 'black';
         this.selector = options.selector || '#content';
         
@@ -146,7 +146,7 @@ class DrawCircle {
 
         e.preventDefault();
 
-        let child = this.el.children[this.el.children.length - 1];
+        let child = this.el.lastChild;
 
         let currentX = e.changedTouches[0].pageX;
         let currentY = e.changedTouches[0].pageY;
@@ -168,7 +168,7 @@ class DrawCircle {
         // console.log("onTouchCancel", e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         this.isTouching = false;
         this.canDraw = false;
-        this.el.removeChild(this.el.children[this.el.children.length - 1]);
+        this.el.removeChild(this.el.lastChild);
 
         this.map && this.map.activate();
     }
