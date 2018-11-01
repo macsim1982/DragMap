@@ -1,14 +1,15 @@
 'use strict';
 
 if (module.hot) {
-  module.hot.accept();
+    module.hot.accept();
 }
 
 import '../styles/index.scss';
 
-import DragMap from './DragMap.js';
-import DrawCircle from './DrawCircle.js';
-
+import DragMap from './DragMap';
+import DrawCircle from './DrawCircle';
+import Button from './Button';
+import InViewport from './in-viewport/InViewport';
 // import WebGL from './WebGL.js';
 // import iceFactory from './iceFactory.js';
 /*
@@ -33,7 +34,22 @@ const plugins = [CSSPlugin, ScrollToPlugin];
 */
 
 let map = new DragMap({});
-let draw = new DrawCircle({ map, className: 'circle', eventElement: document, color: "yellow", minDelta: 50, maxDelta: 800 });
+
+new DrawCircle({ map, className: 'circle', eventElement: document, color: 'rgba(255, 255, 255, 0.3)', minDelta: 50, maxDelta: 800 });
+
+new Button({
+    buttonSelector: '[data-uniq="button-00"]',
+    bubbleSelector: '.button-bubble',
+    bubbleHiddenClass: 'mcs-hidden',
+});
+
+let $items = document.querySelectorAll('.button');
+for (let $i in $items) {
+  if ($i < 1)
+  new InViewport({
+    element: $items[$i]
+  });
+}
 
 // let gl = new WebGL({ canvasSelector: '#canvas', bgColor: [0, 0, 0, 0] });
 

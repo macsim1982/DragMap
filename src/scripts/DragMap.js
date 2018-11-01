@@ -127,6 +127,12 @@ class DragMap {
             evt.changedTouches = [{ pageX: evt.pageX, pageY: evt.pageY }];
         }
 
+        if (!this.previousTouches[0]) {
+            this.previousTouches = [];
+            this.previousTouches[0] = {};
+            this.previousTouches[0].touches = evt.changedTouches;
+        }
+
         var dx = this.previousTouches[0].touches[0].pageX - evt.changedTouches[0].pageX;
         var dy = this.previousTouches[0].touches[0].pageY - evt.changedTouches[0].pageY;
 

@@ -33,7 +33,7 @@ class DrawCircle {
         this.el.addEventListener("mousedown", this.onTouchStart.bind(this));
         this.el.addEventListener("mousemove", this.onTouchMove.bind(this));
         this.el.addEventListener("mouseup", this.onTouchEnd.bind(this));
-        this.el.addEventListener("mouseleave", this.mouseup.bind(this));
+        this.el.addEventListener("mouseleave", this.onTouchEnd.bind(this));
 
         // Mobile
         eventElement.addEventListener("touchstart", this.onTouchStart.bind(this), {passive: false});
@@ -68,6 +68,8 @@ class DrawCircle {
         this.startY = e.changedTouches[0].pageY;
 
         this.appendChild(document.createElement("div"));
+
+        this.el.lastChild && this.resetChildSize(this.el.lastChild, this.minDeltaX, this.minDeltaY);
         
         this.boxes.push({
             index: this.el.children.length - 1,
@@ -82,6 +84,7 @@ class DrawCircle {
         child.style.position = "absolute";
         child.style.transform = "translate(-50%, -50%)";
         child.style.backgroundColor = this.color;
+        child.style.border = '5px solid white';
         
 
         this.setChildPosition(child);
@@ -102,20 +105,27 @@ class DrawCircle {
 
         let deltaX = Math.min(
             this.maxDeltaX,
-            Math.max(this.minDeltaX, x - this.startX)
+            Math.max(this.minDeltaX, Math.abs(x - this.startX))
         );
         let deltaY = Math.min(
             this.maxDeltaY,
-            Math.max(this.minDeltaX, y - this.startY)
+            Math.max(this.minDeltaY, Math.abs(y - this.startY))
         );
+
+        console.log(deltaX, deltaY);
 
         if (deltaX + deltaY < 40) {
             return;
         }
 
-        child.style.width = deltaX + "px";
-        child.style.height = deltaX + "px";
-        child.style.borderRadius = deltaX / 2 + "px " + deltaX / 2 + "px";
+        child.style.width = (deltaX + deltaY) / 2 + "px";
+        child.style.height = (deltaX + deltaY) / 2 + "px";
+        child.style.borderRadius = (deltaX + deltaY) / 2 + "px " + (deltaX + deltaY) / 2 + "px";
+    }
+    resetChildSize(child, w, h) {
+        child.style.width = (w || "0") + "px";
+        child.style.height = (h || "0") + "px";
+        child.style.borderRadius = (w || "0") + "px " + (h || "0") + "px";
     }
     getTranslate(item) {
         var transArr = [];
