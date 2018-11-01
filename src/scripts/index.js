@@ -9,7 +9,10 @@ import '../styles/index.scss';
 import DragMap from './DragMap';
 import DrawCircle from './DrawCircle';
 import Button from './Button';
+// import Waypoint from './Waypoint';
 import InViewport from './in-viewport/InViewport';
+// import { groups } from './Group';
+// import { allWaypoints } from './Waypoint';
 // import WebGL from './WebGL.js';
 // import iceFactory from './iceFactory.js';
 /*
@@ -33,9 +36,6 @@ const plugins = [CSSPlugin, ScrollToPlugin];
 
 */
 
-let map = new DragMap({});
-
-new DrawCircle({ map, className: 'circle', eventElement: document, color: 'rgba(255, 255, 255, 0.3)', minDelta: 50, maxDelta: 800 });
 
 new Button({
     buttonSelector: '[data-uniq="button-00"]',
@@ -43,13 +43,38 @@ new Button({
     bubbleHiddenClass: 'mcs-hidden',
 });
 
-let $items = document.querySelectorAll('.button');
+let $items = document.querySelectorAll('#zone1 .button');
 for (let $i in $items) {
-  if ($i < 1)
+  if ($i < 16)
   new InViewport({
     element: $items[$i]
   });
 }
+
+// new Waypoint({
+//   element: document.querySelector('.button'),
+//   handler: (a) => {
+//     console.log(a, allWaypoints, groups);
+//   },
+//   horizontal: true
+// });
+
+
+let map = new DragMap({
+  onDragCallback: () => {
+    InViewport.refreshAll(); //.refresh();
+  }
+});
+
+new DrawCircle({
+  map,
+  className: 'circle',
+  eventElement: document,
+  color: 'rgba(255, 255, 255, 0.3)',
+  minDelta: 50,
+  maxDelta: 800
+});
+
 
 // let gl = new WebGL({ canvasSelector: '#canvas', bgColor: [0, 0, 0, 0] });
 

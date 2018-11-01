@@ -3,7 +3,8 @@ import { TweenMax } from "gsap/TweenMax";
 class DragMap {
     constructor(options) {
         this.options = {
-            container: options.container || document
+            container: options.container || document,
+            onDragCallback: options.onDragCallback,
         };
 
         this.useDebounce = true;        // Boolean : activate or desactivate debounce animation
@@ -150,7 +151,18 @@ class DragMap {
             this.distance.y -= (this.previousTouches[0].touches[0].pageY - this.previousTouches[1].touches[0].pageY) * this.debounceFactor;
 
             this.distance = this.getBoundDistance(this.distance, false);
-            TweenMax.to(this.obj, this.debounceDuration, { scale: this.zoomFactor, x: this.distance.x, y: this.distance.y, ease: Power4.easeOut, overwrite: 1 });
+            TweenMax.to(this.obj, this.debounceDuration, {
+                scale: this.zoomFactor,
+                x: this.distance.x,
+                y: this.distance.y,
+                ease: Power4.easeOut,
+                overwrite: 1,
+                onComplete: function () {
+                    if (typeof this.options.onDragCallback === 'function') {
+                        this.options.onDragCallback();
+                    }
+                }.bind(this)
+            });
         }
 
         this.previousTouches = []; // Reset previousTouches
@@ -230,6 +242,10 @@ class DragMap {
         TweenMax.to(this.obj, duration, { scale: this.zoomFactor, x: this.distance.x, y: this.distance.y, ease: Power4.easeinout, onComplete: function() {
             this.previousTouches = [];
             this.zoomFactor = this.getBoundZoom(this.getZoomFactorFromView(this.currentView));
+
+            if (typeof this.options.onDragCallback === 'function') {
+                this.options.onDragCallback();
+            }
         }.bind(this) });
 
 
