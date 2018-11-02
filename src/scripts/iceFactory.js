@@ -50,17 +50,20 @@ export default function iceFactory({
     }
 
     // Return a filtered arrays
-    function filter(filter, value) {
-        return filter([...db], value);
+    function filter(options) {
+        var items = [];
+
+
+        for (let key in options) {
+            db.forEach(item => {
+                item[key] === options[key] && items.indexOf(item) < 0 && items.push(item);
+            });
+        }
+
+        return items;
     }
 
     function filterByPrice(price) {
-        var items = [];
-
-        db.forEach(item => {
-            item.price === price && items.push(item);
-        });
-
-        return items;
+        return filter({'price': price});
     }
 }
