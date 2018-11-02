@@ -52,7 +52,7 @@ class DrawCircle {
             }
 
             this.onStartDrag(e);
-        }, 200);
+        }, 400);
     }
     onStartDrag(e) {
 
