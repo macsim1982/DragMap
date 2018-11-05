@@ -1,0 +1,20 @@
+.js-fill-or-fit,
+.other-container,
+.container {
+  display: block;
+  background: green;
+  width: 100%;
+  height: 80vh;
+  margin: 40px auto;
+}
+
+.other-video,
+.video,
+.js-fill-or-fit-child {
+  box-shadow: 0 0 0 1px red;
+  opacity: 0.5;
+}
+
+.in-viewport {
+  background: red !important;
+}

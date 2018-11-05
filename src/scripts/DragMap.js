@@ -79,20 +79,20 @@ class DragMap {
 
         if (!target) return false;
 
-        
+
 
         this.gotoView(JSON.parse(target), this.gotoViewDuration, false);
     }
     handleStart(evt) {
         if (!this.canMove) return false;
-        
+
         if (!evt.changedTouches) {
             evt.changedTouches = [{ pageX: evt.pageX, pageY: evt.pageY }];
         }
         this.previousTouches.push({ touches: evt.changedTouches });
 
         this.time = this.now();
-        
+
         this.dragStart = true;
     }
     handleMove(evt) {
@@ -115,6 +115,7 @@ class DragMap {
         this.distance = this.getBoundDistance(this.distance, this.useDebounce);
 
         TweenMax.set(this.obj, { scale: this.zoomFactor, x: this.distance.x, y: this.distance.y });
+        this.options.onDragCallback();
 
         if (this.previousTouches.length > 1) {
             this.previousTouches.splice(0, 1);
@@ -151,13 +152,14 @@ class DragMap {
             this.distance.y -= (this.previousTouches[0].touches[0].pageY - this.previousTouches[1].touches[0].pageY) * this.debounceFactor;
 
             this.distance = this.getBoundDistance(this.distance, false);
+
             TweenMax.to(this.obj, this.debounceDuration, {
                 scale: this.zoomFactor,
                 x: this.distance.x,
                 y: this.distance.y,
                 ease: Power4.easeOut,
                 overwrite: 1,
-                onComplete: function () {
+                onUpdate: function () {
                     if (typeof this.options.onDragCallback === 'function') {
                         this.options.onDragCallback();
                     }
@@ -239,14 +241,21 @@ class DragMap {
         }
 
 
-        TweenMax.to(this.obj, duration, { scale: this.zoomFactor, x: this.distance.x, y: this.distance.y, ease: Power4.easeinout, onComplete: function() {
-            this.previousTouches = [];
-            this.zoomFactor = this.getBoundZoom(this.getZoomFactorFromView(this.currentView));
-
-            if (typeof this.options.onDragCallback === 'function') {
-                this.options.onDragCallback();
-            }
-        }.bind(this) });
+        TweenMax.to(this.obj, duration, {
+            scale: this.zoomFactor,
+            x: this.distance.x,
+            y: this.distance.y,
+            ease: Power4.easeinout,
+            onUpdate: function() {
+                if (typeof this.options.onDragCallback === 'function') {
+                    this.options.onDragCallback();
+                }
+            }.bind(this),
+            onComplete: function() {
+                this.previousTouches = [];
+                this.zoomFactor = this.getBoundZoom(this.getZoomFactorFromView(this.currentView));
+            }.bind(this)
+        });
 
 
     }
