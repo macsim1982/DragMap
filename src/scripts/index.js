@@ -44,11 +44,12 @@ new Button({
     bubbleHiddenClass: 'mcs-hidden',
 });
 
-let $items = document.querySelectorAll('#zone1 .button');
+let $items = document.querySelectorAll('.in-viewport');
 for (let $i in $items) {
   if ($i < 16)
   new InViewport({
-    element: $items[$i]
+    element: $items[$i],
+    context: document.querySelector('.in-viewport--context')
   });
 }
 

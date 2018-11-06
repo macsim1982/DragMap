@@ -76,27 +76,31 @@ class InViewport {
 
         // console.log(this.key, key, previous, current);
 
-        for (let key in viewport) {
+
             // viewport[key][0] && console.log('leave to ' + key);
             // viewport[key][1] && console.log('enter from ' + key);
 
-            if (this.options.element && !this.isAnimating) {
-                if (viewport[key][1]) {
-                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--enter-from-' + key, 300);
+        if (this.options.element && !this.isAnimating) {
+            for (let k in viewport) {
+                if (viewport[k][1]) {
+                    console.log(this.key, key, k, previous, current);
+                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--enter-from-' + k, 300);
                 }
 
-                if (viewport[key][0]) {
-                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--leave-to-' + key, 300);
+                if (viewport[k][0]) {
+                    console.log(this.key, key, k, previous, current);
+                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--leave-to-' + k, 300);
                 }
             }
         }
 
+
     }
 
     addClassAndRemoveOnAnimationEnd(className, duration) {
-        this.options.element.classList.add(className);
-
         this.isAnimating = true;
+
+        this.options.element.classList.add(className);
 
         const timeOut = setTimeout(() => {
             this.options.element.classList.remove(className);

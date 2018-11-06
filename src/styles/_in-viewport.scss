@@ -4,7 +4,7 @@
   }
 
   100% {
-    transform: translate(0, -100%);
+    transform: translate(0, -100px);
   }
 }
 
@@ -14,7 +14,7 @@
   }
 
   100% {
-    transform: translate(0, 100%);
+    transform: translate(0, 100px);
   }
 }
 
@@ -24,7 +24,7 @@
   }
 
   100% {
-    transform: translate(-100%, 0);
+    transform: translate(-100px, 0);
   }
 }
 
@@ -34,23 +34,23 @@
   }
 
   100% {
-    transform: translate(100%, 0);
+    transform: translate(100px, 0);
   }
 }
 
 
 .in-viewport {
   opacity: 0;
-  transition: opacity 300ms ease-in;
+  transition: opacity 300ms;
 
-  &--part-visible {
-    opacity: 0.6;
-    transition: opacity 300ms ease-out;
+  &.in-viewport--part-visible {
+    opacity: 0.5;
+    transition: opacity 300ms;
   }
 
-  &--all-in-viewport {
+  &.in-viewport--all-in-viewport {
     opacity: 1;
-    transition: opacity 300ms ease-out;
+    transition: opacity 300ms;
   }
 }
 .in-viewport--enter-from-top {
@@ -78,4 +78,15 @@
 }
 .in-viewport--leave-to-left {
   animation: to-left 300ms ease-out forwards;
+}
+
+
+.in-viewport--context {
+  position: fixed;
+  border: 3px solid blue;
+  pointer-events: NONE;
+  left: 200px;
+  top: 100px;
+  right: 200px;
+  bottom: 100px;
 }
