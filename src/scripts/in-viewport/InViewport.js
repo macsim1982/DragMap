@@ -70,9 +70,40 @@ class InViewport {
         document.removeEventListener('scroll', this.throttledScroll, false);
     }
 
-    onChangeViewportCB(key, previous, current) {
+    onChangeViewportCB(key, previous, current, viewport) {
         // on change viewport callback...
         this.options.element.classList[current === 1 ? 'add' : 'remove'](key);
+
+        // console.log(this.key, key, previous, current);
+
+        for (let key in viewport) {
+            // viewport[key][0] && console.log('leave to ' + key);
+            // viewport[key][1] && console.log('enter from ' + key);
+
+            if (this.options.element && !this.isAnimating) {
+                if (viewport[key][1]) {
+                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--enter-from-' + key, 300);
+                }
+
+                if (viewport[key][0]) {
+                    this.addClassAndRemoveOnAnimationEnd(NAMESPACE + '--leave-to-' + key, 300);
+                }
+            }
+        }
+
+    }
+
+    addClassAndRemoveOnAnimationEnd(className, duration) {
+        this.options.element.classList.add(className);
+
+        this.isAnimating = true;
+
+        const timeOut = setTimeout(() => {
+            this.options.element.classList.remove(className);
+            this.isAnimating = false;
+
+            clearTimeout(timeOut);
+        }, duration);
     }
 
     onChange(type, cb) {
@@ -89,68 +120,59 @@ class InViewport {
         this.refreshAll();
     }
 
-
-
     refresh() {
         // console.log('refresh', this.options, this.key);
+        const context = (this.options.context === 'window') ? document.documentElement : this.options.context;
+        const element = this.options.element;
 
-        let rect = this.options.element.getBoundingClientRect();
-
-        const c = {
-            top: 0,
-            bottom: window.innerHeight,
-            left: 0,
-            right: window.innerWidth
-        };
-
-        const el = {
-            top: rect.top,
-            bottom: rect.bottom,
-            left: rect.left,
-            right: rect.right
-        };
+        let elRect = element.getBoundingClientRect();
+        let ctxRect = context.getBoundingClientRect();
 
         // console.table({ 'ctop': ctop, 'cbot': cbot, 'etop': etop, 'ebot': ebot} );
 
         let obj = {
-            'context': c,
-            'el': el,
-            'all-in-viewport': Number(el.top >= c.top && el.bottom <= c.bottom && el.left >= c.left && el.right <= c.right),
-            'part-visible': Number(el.top <= c.bottom && el.bottom >= c.top && el.left <= c.right && el.right >= c.left),
+            [NAMESPACE + '--all-in-viewport']: Number(elRect.top >= ctxRect.top && elRect.bottom <= ctxRect.bottom && elRect.left >= ctxRect.left && elRect.right <= ctxRect.right),
+            [NAMESPACE + '--part-visible']: Number(elRect.top <= ctxRect.bottom && elRect.bottom >= ctxRect.top && elRect.left <= ctxRect.right && elRect.right >= ctxRect.left),
         };
 
         // Refresh only if something has change
         for (let k in obj) {
             if (typeof this.obj === 'object') {
                 if (this.obj[k] !== obj[k]) {
-                    this.onChange(k, this.onChangeViewportCB.bind(this, k, this.obj[k], obj[k]));
+                    const viewport = this.calculate(this.ctxRect, this.elRect, ctxRect, elRect);
+
+                    this.onChange(k, this.onChangeViewportCB.bind(this, k, this.obj[k], obj[k], viewport));
                 }
             }
         }
 
-        // console.log(this.key, {
-        //     key: this.key,
-        //     all: obj["all-in-viewport"],
-        //     part: obj["part-visible"],
-        //     el: this.options.element
-        // });
-
+        this.elRect = elRect;
+        this.ctxRect = ctxRect;
         this.obj = Object.assign({}, obj);
 
         return obj;
     }
 
-    refreshAll() {
-        const instances = InViewport.allInstances;
-
-        for (let key in instances) {
-            instances[key].refresh();
+    calculate(pc, pe, cc, ce) {
+        function calculate(a, b, c, d) {
+            return [a >= b && c < d, c >= d && a < b];
         }
+
+        let top = calculate(cc.top, ce.bottom, pc.top, pe.bottom);
+        let left = calculate(cc.left, ce.right, pc.left, pe.right);
+        let right = calculate(pc.right, pe.left, cc.right, ce.left);
+        let bottom = calculate(pc.bottom, pe.top, cc.bottom, ce.top);
+
+        return {
+            top, right, bottom, left
+        };
+    }
+
+    refreshAll() {
+        InViewport.refreshAll();
     }
 
     static refreshAll() {
-        // console.log('refreshAll', InViewport.allInstances);
-
         const instances = InViewport.allInstances;
 
         for (let key in instances) {

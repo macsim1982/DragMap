@@ -96,8 +96,6 @@ export class OutOfViewport {
   }
 }
 
-const crypto = window.crypto || window['msCrypto'];
-
 function debounced(delay, fn) {
   let timerId;
   return function (...args) {
@@ -111,19 +109,15 @@ function debounced(delay, fn) {
   };
 }
 
-function uuidv4() {
-  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c => // eslint-disable-line
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-  );
-}
-const DEFAULT_SELECTOR = '.js-fill-or-fit';
+const DEFAULT_SELECTOR = '.js-fill-or-fit'; // The element on which apply the fill or fit (visible zone)
 
 const DEFAULT_OPTIONS = {
   childSelector: '.js-fill-or-fit-child', // Selector that determine on which child to apply the fill or fit style
-  fitMode: 'fill' // Determine which mode to apply on elements
+  fitMode: 'fill' // Determine which mode to apply on elements fill|fit
 };
 
-let instances = [];
+let keyCounter = 0;
+let allInstances = [];
 
 /**
  * Fill Or Fit class
@@ -132,24 +126,27 @@ let instances = [];
  */
 class FillOrFit {
   constructor($el, options) {
-    this.$wrapper = $el;
+    this.$wrapper = $el || document.querySelector(DEFAULT_SELECTOR);
 
     if (this.$wrapper) {
       this.options = Object.assign({}, DEFAULT_OPTIONS, options);
       this.$child = this.$wrapper.querySelector(this.options.childSelector);
 
-      if (this.$child) {
-        this.initialize();
+      if (this.$child && !allInstances[this.key]) {
+        this.key = 'fillorfit-' + keyCounter;
+        this.initialSize = this.getInitialSize(this.$child);
+        this.setParentStyle(this.$wrapper);
+        this.setChildStyle(this.$child);
+        this.refresh();
+
+        allInstances[this.key] = this;
+        FillOrFit.allInstances = allInstances;
+
+        this.bindEvents();
+
+        keyCounter++;
       }
     }
-  }
-
-  initialize() {
-    this.fillOrFitId = uuidv4();
-    this.initialSize = this.getInitialSize(this.$child);
-    this.setParentStyle(this.$wrapper);
-    this.setChildStyle(this.$child);
-    this.fillOrFit(this.$wrapper, this.$child);
   }
 
   setParentStyle($el) {
@@ -180,24 +177,7 @@ class FillOrFit {
   }
 
   onResize() {
-    this.fillOrFit(this.$wrapper, this.$child);
-  }
-
-  fillOrFit($wrapper, $child) {
-    const rect = $wrapper.getBoundingClientRect();
-    const parentWidth = rect.width;
-    const parentHeight = rect.height;
-    const parentRatio = parentWidth / parentHeight;
-    const childRatio = this.initialSize.width / this.initialSize.height;
-    const compare = (this.options.fitMode === 'fill') ? parentRatio > childRatio : parentRatio < childRatio;
-
-    if (compare) {
-      $child.style.width = parentWidth + 'px';
-      $child.style.height = Math.round(parentWidth / childRatio) + 'px';
-    } else {
-      $child.style.width = Math.round(parentHeight * childRatio) + 'px';
-      $child.style.height = parentHeight + 'px';
-    }
+    this.refreshAll();
   }
 
   desactivate() {
@@ -207,65 +187,52 @@ class FillOrFit {
     delete this.fillOrFitId;
     delete this.initialSize;
   }
+
+
+  bindEvents() {
+    this.onResize = debounced(200, this.onResize.bind(this));
+
+    if (!this.events) {
+      window.addEventListener('resize', this.onResize, false);
+      this.events = true;
+    }
+  }
+
+  refresh() {
+    const rect = this.$wrapper.getBoundingClientRect();
+    const parentWidth = rect.width;
+    const parentHeight = rect.height;
+    const parentRatio = parentWidth / parentHeight;
+    const childRatio = this.initialSize.width / this.initialSize.height;
+    const compare = (this.options.fitMode === 'fill') ? parentRatio >= childRatio : parentRatio < childRatio;
+
+    if (compare) {
+      this.$child.style.width = parentWidth + 'px';
+      this.$child.style.height = Math.round(parentWidth / childRatio) + 'px';
+    } else {
+      this.$child.style.width = Math.round(parentHeight * childRatio) + 'px';
+      this.$child.style.height = parentHeight + 'px';
+    }
+  }
+
+  refreshAll() {
+    const instances = FillOrFit.allInstances;
+
+    for (let key in instances) {
+      instances[key].refresh();
+    }
+  }
+
+  static refreshAll() {
+
+    const instances = FillOrFit.allInstances;
+
+    console.log('refreshAll', FillOrFit.allInstances);
+
+    for (let key in instances) {
+      instances[key].refresh();
+    }
+  }
 }
 
-const fillOrFit = {
-  initialize: function () {
-    this.activateInstances(document.querySelectorAll(DEFAULT_SELECTOR), DEFAULT_OPTIONS);
-
-    this.debouncedResize = debounced(200, this.onResize.bind(this));
-
-    window.addEventListener('resize', this.debouncedResize, false);
-  },
-
-  activateInstances: function ($items, options) {
-    for (let $el of $items) {
-      if (!$el.fillOrFitId) {
-        this.activateInstance($el, options);
-      }
-    }
-  },
-
-  activateInstance: function ($el, options) {
-    options = Object.assign({}, DEFAULT_OPTIONS, options);
-
-    let instance = new FillOrFit($el, {
-      childSelector: $el.dataset.childSelector || options.childSelector,
-      fitMode: $el.dataset.fitMode || options.fitMode
-    });
-
-    instances.push(instance);
-
-    return instance;
-  },
-
-  desactivateInstance: function (index) {
-    if (instances[index]) {
-      instances[index].desactivate();
-      instances.splice(index, 1);
-    }
-  },
-
-  desactivateInstanceAtIndex: function (index) {
-    this.desactivateInstance(index);
-  },
-
-  desactivateAllInstances: function () {
-    while (instances.length > 0) {
-      this.desactivateInstanceAtIndex(0);
-    }
-  },
-
-  onResize: function () {
-    for (let instance of instances) {
-      instance.onResize();
-    }
-  },
-
-  destroy: function () {
-    this.desactivateAllInstances();
-    window.removeEventListener('resize', this.debouncedResize, false);
-  }
-};
-
-export default fillOrFit;
+export default FillOrFit;

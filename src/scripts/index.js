@@ -6,11 +6,12 @@ if (module.hot) {
 
 import '../styles/index.scss';
 
+import Button from './Button';
 import DragMap from './DragMap';
 import DrawCircle from './DrawCircle';
-import Button from './Button';
 // import Waypoint from './Waypoint';
 import InViewport from './in-viewport/InViewport';
+
 // import { groups } from './Group';
 // import { allWaypoints } from './Waypoint';
 // import WebGL from './WebGL.js';
